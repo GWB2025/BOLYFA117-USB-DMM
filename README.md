@@ -47,6 +47,18 @@ python bolyfa117_logger.py --mode dashboard
 python3 bolyfa117_logger.py --mode dashboard --port /dev/ttyUSB0
 ```
 
+## Browser Dashboard (No Installation Required)
+
+You can use the BOLYFA 117 directly in your browser without installing Python:
+
+**[Launch Browser App](https://gwb2025.github.io/BOLYFA117-USB-DMM)**
+
+Requirements:
+- Chrome 89+ or Edge 89+ browser (Web Serial API required)
+- BOLYFA 117 in USB mode (press the REL/USB button until the USB icon appears)
+
+The browser app uses the [Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) to communicate directly with the CH340 USB bridge. All protocol decoding, smoothing, and charting runs locally in JavaScript — no data leaves your computer.
+
 ## Usage
 
 ### Auto-detect (recommended)
@@ -162,9 +174,11 @@ See [Protocol Analysis](BOLYFA117_Protocol_Analysis.md) for full details.
 
 This project builds on the reverse-engineering work of:
 
-- **[furriephillips](https://github.com/furriephillips/BOLYFA117-USB-DMM)** — Original BOLYFA 117 USB protocol discovery
-- **[PaulZC](https://github.com/PaulZC/DMM_Data_Logger)** — Python 2 CSV logger and packet decoder
-- **[Paul Daniels (inflex)](https://github.com/inflex/BSIDE-ADM20)** — Original 7-segment lookup tables and framing logic
+- **[furriephillips](https://github.com/furriephillips/BOLYFA117-USB-DMM)** — Original BOLYFA 117 USB protocol discovery and raw data capture
+- **[PaulZC](https://github.com/PaulZC/DMM_Data_Logger)** — Python 2 CSV logger and complete packet decoder
+- **[Paul Daniels (inflex)](https://github.com/inflex/BSIDE-ADM20)** — Original 7-segment lookup tables and framing logic for the BSIDE ADM20 (protocol-compatible with BOLYFA 117)
+
+Without their prior work decoding the 22-byte serial stream, this project would not have been possible.
 
 ## License
 

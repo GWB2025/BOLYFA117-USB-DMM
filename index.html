@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BOLYFA 117 Browser Dashboard</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;padding:10px}
+  h1{text-align:center;color:#00d4ff;margin:8px 0;font-size:1.4rem}
+  .container{max-width:900px;margin:0 auto;padding:0 5px}
+  .btn{display:inline-block;background:#00d4ff;color:#1a1a2e;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;transition:background 0.2s}
+  .btn:hover{background:#00ff88}
+  .btn:disabled{background:#555;color:#aaa;cursor:not-allowed}
+  .btn-wrap{text-align:center;margin:10px 0}
+  .card{background:#16213e;border-radius:12px;padding:15px;margin:10px 0;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
+  .big-value{font-size:clamp(48px,12vw,72px);text-align:center;color:#00ff88;font-weight:bold;margin:8px 0;line-height:1}
+  .units{font-size:clamp(18px,4vw,28px);color:#aaa;text-align:center;margin-top:4px}
+  .mode{font-size:clamp(14px,3vw,18px);color:#ffaa00;text-align:center;margin-top:4px;min-height:20px}
+  .flags{text-align:center;margin:8px 0;min-height:24px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
+  .flag{background:#0f3460;padding:3px 10px;border-radius:10px;font-size:11px;color:#00d4ff;border:1px solid #0f3460}
+  .bar-container{background:#0f3460;border-radius:6px;height:28px;margin:12px 0;overflow:hidden;position:relative}
+  .bar-fill{background:linear-gradient(90deg,#00ff88,#00d4ff);height:100%;width:0%;transition:width 0.4s ease}
+  .bar-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none}
+  .status{text-align:center;font-size:13px;margin-top:8px}
+  .connected{color:#00ff88}.disconnected{color:#ff4444}.error{color:#ff4444}
+  .timestamp{text-align:center;color:#666;font-size:11px;margin-top:6px}
+  .chart-wrap{position:relative;margin-top:12px;overflow-x:auto}
+  canvas{width:100%;height:200px;background:#0f1a2e;border-radius:6px;border:1px solid #1a3a5c;display:block}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px}
+  .stat{text-align:center;background:#0f1a2e;border-radius:6px;padding:6px}
+  .stat-label{color:#888;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}
+  .stat-value{color:#00d4ff;font-size:clamp(14px,3vw,16px);font-weight:bold}
+  .alert-banner{background:#ff4444;color:#fff;text-align:center;padding:8px;border-radius:6px;margin:8px 0;font-weight:bold;display:none}
+  .alert-banner.show{display:block}
+  .info-box{background:#0f3460;border-radius:8px;padding:12px;margin:10px 0;font-size:13px;color:#aaa}
+  .info-box code{background:#1a1a2e;padding:2px 6px;border-radius:4px;color:#00ff88;font-family:monospace}
+  @media(min-width:600px){.stats{grid-template-columns:repeat(5,1fr)}.big-value{font-size:72px}.units{font-size:28px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>&#128268; BOLYFA 117 Browser Dashboard</h1>
+
+  <div class="btn-wrap">
+    <button id="connectBtn" class="btn">&#128268; Connect to BOLYFA 117</button>
+    <button id="disconnectBtn" class="btn" disabled>&#10060; Disconnect</button>
+  </div>
+
+  <div class="info-box" id="infoBox">
+    <strong>How to use:</strong><br>
+    1. Plug in your BOLYFA 117 USB cable<br>
+    2. Press the <code>REL/USB</code> button on the meter until the USB icon appears<br>
+    3. Click <strong>Connect</strong> above and select the CH340 port from the browser prompt<br>
+    4. This works in <strong>Chrome/Edge only</strong> (Web Serial API required)
+  </div>
+
+  <div class="alert-banner" id="alert-banner">ALERT</div>
+
+  <div class="card">
+    <div class="big-value" id="value">---</div>
+    <div class="units" id="units">Not connected</div>
+    <div class="mode" id="mode"></div>
+    <div class="flags" id="flags"></div>
+    <div class="bar-container">
+      <div class="bar-fill" id="bar"></div>
+      <div class="bar-label" id="bar-label">0 / 60</div>
+    </div>
+    <div class="status" id="status"><span class="disconnected">&#9679; Disconnected</span></div>
+    <div class="timestamp" id="timestamp"></div>
+  </div>
+
+  <div class="card">
+    <h3>&#128202; Live Trend</h3>
+    <div class="chart-wrap"><canvas id="chart" width="860" height="200"></canvas></div>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Current</div><div class="stat-value" id="stat-cur">---</div></div>
+      <div class="stat"><div class="stat-label">Min</div><div class="stat-value" id="stat-min">---</div></div>
+      <div class="stat"><div class="stat-label">Max</div><div class="stat-value" id="stat-max">---</div></div>
+      <div class="stat"><div class="stat-label">Range</div><div class="stat-value" id="stat-rng">---</div></div>
+      <div class="stat"><div class="stat-label">Points</div><div class="stat-value" id="stat-pts">0</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>&#128225; Raw Packet</h3>
+    <div style="font-family:monospace;font-size:12px;color:#888;background:#0f1a2e;padding:10px;border-radius:6px;overflow-x:auto" id="rawPacket">Waiting for data...</div>
+  </div>
+</div>
+
+<script>
+// ======================== PROTOCOL DECODER ========================
+const HEADER = [0xAA, 0x55, 0x52, 0x24, 0x01, 0x10];
+const PACKET_SIZE = 22;
+
+const SEGMENTS = {
+  0x5F: '0', 0x06: '1', 0x6B: '2', 0x2F: '3',
+  0x36: '4', 0x3D: '5', 0x7D: '6', 0x07: '7',
+  0x7F: '8', 0x3F: '9', 0x79: 'E', 0x58: 'L',
+};
+
+function decodeDigit(byteVal) {
+  return SEGMENTS[byteVal & 0x7F] || '';
+}
+
+function hasDP(byteVal) {
+  return Boolean(byteVal & 0x80);
+}
+
+function countBits(byteVal) {
+  let n = byteVal, count = 0;
+  while (n) { count += n & 1; n >>= 1; }
+  return count;
+}
+
+function decodePacket(packet) {
+  if (packet.length !== PACKET_SIZE) return null;
+  // Verify header
+  for (let i = 0; i < 6; i++) {
+    if (packet[i] !== HEADER[i]) return null;
+  }
+
+  // Decode digits (bytes 9,8,7,6)
+  const digits = [];
+  let d = decodeDigit(packet[9]);
+  if (d) digits.push(d);
+  for (const idx of [8, 7, 6]) {
+    if (hasDP(packet[idx])) digits.push('.');
+    d = decodeDigit(packet[idx]);
+    if (d) digits.push(d);
+  }
+  const sign = (packet[10] & 0x08) ? '-' : '';
+  const valueStr = sign + digits.join('');
+
+  // Decode units
+  const b21 = packet[21], b20 = packet[20], b19 = packet[19];
+  const units = [];
+  if (b21 & 0x20) units.push('k');
+  if (b21 & 0x10) units.push('M');
+  if (b21 & 0x02) units.push('m');
+  if (b21 & 0x01) units.push('μ');
+  if (b21 & 0x80) units.push('Hz');
+  if (b21 & 0x40) units.push('Ω');
+  if (b21 & 0x08) units.push('V');
+  if (b21 & 0x04) units.push('A');
+  if (b20 & 0x20) units.push('μ');
+  if (b20 & 0x40) units.push('n');
+  if (b20 & 0x80) units.push('F');
+  if (b20 & 0x02) units.push('°F');
+  if (b20 & 0x01) units.push('°C');
+  if (b19 & 0x20) units.push('%');
+  if (b19 & 0x40) units.push('hFE');
+
+  // Decode modes
+  const modes = [];
+  if (packet[10] & 0x04) modes.push('DC');
+  if (packet[10] & 0x02) modes.push('AC');
+  if (packet[10] & 0x01) modes.push('DIODE');
+  if (packet[10] & 0x40) modes.push('CONT');
+
+  // Decode flags
+  const flags = [];
+  if (packet[19] & 0x01) flags.push('USB');
+  if (packet[18] & 0x20) flags.push('AUTO');
+  if (packet[18] & 0x80) flags.push('REL');
+  if (packet[19] & 0x02) flags.push('MAX');
+  if (packet[19] & 0x08) flags.push('MIN');
+  if (packet[10] & 0x20) flags.push('BAR');
+
+  // Bar graph
+  let bars = 0;
+  for (let i = 11; i < 18; i++) bars += countBits(packet[i]);
+  bars += countBits(packet[18] & 0x0F);
+
+  return {
+    timestamp: new Date().toISOString(),
+    value: valueStr,
+    units: units.join(''),
+    mode: modes.join('+'),
+    flags: flags.join(','),
+    bar: bars,
+    raw: packet.map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ')
+  };
+}
+
+// ======================== WEB SERIAL ========================
+let port = null;
+let reader = null;
+let keepReading = false;
+const buffer = [];
+
+const connectBtn = document.getElementById('connectBtn');
+const disconnectBtn = document.getElementById('disconnectBtn');
+const statusEl = document.getElementById('status');
+const infoBox = document.getElementById('infoBox');
+
+connectBtn.addEventListener('click', async () => {
+  if (!('serial' in navigator)) {
+    alert('Web Serial API is not supported in this browser. Please use Chrome or Edge.');
+    return;
+  }
+  try {
+    // Request port - CH340 vendor ID is 0x1a86 (QinHeng)
+    port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x1a86 }] });
+    await port.open({ baudRate: 2400, dataBits: 8, parity: 'none', stopBits: 1 });
+
+    connectBtn.disabled = true;
+    disconnectBtn.disabled = false;
+    statusEl.innerHTML = '<span class="connected">&#9679; Connected</span>';
+    infoBox.innerHTML = '<strong>Status:</strong> Reading data from BOLYFA 117...';
+    keepReading = true;
+    readLoop();
+  } catch (err) {
+    console.error(err);
+    statusEl.innerHTML = '<span class="error">&#9679; Error: ' + err.message + '</span>';
+  }
+});
+
+disconnectBtn.addEventListener('click', async () => {
+  keepReading = false;
+  if (reader) {
+    await reader.cancel();
+    reader = null;
+  }
+  if (port) {
+    await port.close();
+    port = null;
+  }
+  connectBtn.disabled = false;
+  disconnectBtn.disabled = true;
+  statusEl.innerHTML = '<span class="disconnected">&#9679; Disconnected</span>';
+  infoBox.innerHTML = '<strong>Status:</strong> Disconnected. Click Connect to start.';
+});
+
+async function readLoop() {
+  if (!port || !keepReading) return;
+  reader = port.readable.getReader();
+  try {
+    while (keepReading) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      if (value) {
+        for (const b of value) {
+          buffer.push(b);
+        }
+        // Keep buffer bounded
+        if (buffer.length > 200) {
+          buffer.splice(0, buffer.length - 100);
+        }
+        processBuffer();
+      }
+    }
+  } catch (err) {
+    console.error('Read error:', err);
+    statusEl.innerHTML = '<span class="error">&#9679; Read error: ' + err.message + '</span>';
+  } finally {
+    reader.releaseLock();
+  }
+}
+
+function processBuffer() {
+  while (buffer.length >= PACKET_SIZE) {
+    // Look for header
+    let found = false;
+    for (let i = 0; i <= buffer.length - PACKET_SIZE; i++) {
+      let match = true;
+      for (let j = 0; j < 6; j++) {
+        if (buffer[i + j] !== HEADER[j]) { match = false; break; }
+      }
+      if (match) {
+        const packet = buffer.slice(i, i + PACKET_SIZE);
+        buffer.splice(0, i + PACKET_SIZE);
+        const data = decodePacket(packet);
+        if (data) {
+          updateDashboard(data);
+        }
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      // No header found, discard oldest byte and try again
+      buffer.shift();
+    }
+  }
+}
+
+// ======================== DASHBOARD UI ========================
+const historyData = [];
+let lastNumericValue = NaN;
+
+function updateDashboard(data) {
+  document.getElementById('value').textContent = data.value || '---';
+  document.getElementById('units').textContent = data.units || '';
+  document.getElementById('mode').textContent = data.mode || '';
+  document.getElementById('timestamp').textContent = data.timestamp || '';
+  document.getElementById('rawPacket').textContent = data.raw || 'Waiting...';
+
+  const barPct = Math.min((data.bar / 60) * 100, 100);
+  document.getElementById('bar').style.width = barPct + '%';
+  document.getElementById('bar-label').textContent = (data.bar || 0) + ' / 60';
+
+  // Flags
+  const flagsDiv = document.getElementById('flags');
+  flagsDiv.innerHTML = '';
+  if (data.flags) {
+    data.flags.split(',').forEach(f => {
+      if (f.trim()) {
+        const s = document.createElement('span');
+        s.className = 'flag';
+        s.textContent = f.trim();
+        flagsDiv.appendChild(s);
+      }
+    });
+  }
+
+  // Chart data
+  let nv = parseFloat(data.value);
+  if (!isNaN(nv)) {
+    lastNumericValue = nv;
+    historyData.push({ t: Date.now(), val: nv });
+    if (historyData.length > 120) historyData.shift();
+  }
+
+  const vals = historyData.map(d => d.val).filter(v => !isNaN(v));
+  document.getElementById('stat-cur').textContent = formatNum(lastNumericValue);
+  document.getElementById('stat-min').textContent = vals.length ? formatNum(Math.min(...vals)) : '---';
+  document.getElementById('stat-max').textContent = vals.length ? formatNum(Math.max(...vals)) : '---';
+  const rng = vals.length ? Math.max(...vals) - Math.min(...vals) : NaN;
+  document.getElementById('stat-rng').textContent = formatNum(rng);
+  document.getElementById('stat-pts').textContent = historyData.length;
+
+  drawChart();
+}
+
+function formatNum(n) {
+  if (isNaN(n)) return '---';
+  return n.toFixed(3).replace(/\.0+$/, '').replace(/(\.\d*?)0+$/, '$1');
+}
+
+// ======================== CANVAS CHART ========================
+const canvas = document.getElementById('chart');
+const ctx = canvas.getContext('2d');
+
+function drawChart() {
+  const w = canvas.width, h = canvas.height;
+  const padLeft = 50, padRight = 10, padTop = 15, padBottom = 25;
+  const chartW = w - padLeft - padRight, chartH = h - padTop - padBottom;
+  ctx.clearRect(0, 0, w, h);
+
+  if (historyData.length < 2) {
+    ctx.fillStyle = '#666';
+    ctx.font = '14px Segoe UI';
+    ctx.textAlign = 'center';
+    ctx.fillText('Collecting data...', w / 2, h / 2);
+    return;
+  }
+
+  const vals = historyData.map(d => d.val).filter(v => !isNaN(v));
+  if (vals.length === 0) return;
+
+  let minV = Math.min(...vals), maxV = Math.max(...vals);
+  const rangeRaw = maxV - minV;
+  const pad = rangeRaw === 0 ? Math.max(Math.abs(minV) * 0.1, 1) : rangeRaw * 0.1;
+  minV -= pad; maxV += pad;
+  const range = maxV - minV || 1;
+
+  // Grid lines
+  ctx.strokeStyle = '#1a3a5c';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 5; i++) {
+    const y = padTop + (i / 5) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(w - padRight, y);
+    ctx.stroke();
+    const labelVal = maxV - (i / 5) * range;
+    ctx.fillStyle = '#888';
+    ctx.font = '11px Segoe UI';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(formatNum(labelVal), padLeft - 6, y);
+  }
+
+  // Y-axis
+  ctx.strokeStyle = '#2a4a6c';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(padLeft, padTop);
+  ctx.lineTo(padLeft, h - padBottom);
+  ctx.stroke();
+
+  // Line
+  ctx.beginPath();
+  historyData.forEach((pt, i) => {
+    const x = padLeft + (i / (historyData.length - 1)) * chartW;
+    const y = padTop + ((maxV - pt.val) / range) * chartH;
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = '#00ff88';
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Fill
+  ctx.lineTo(padLeft + chartW, h - padBottom);
+  ctx.lineTo(padLeft, h - padBottom);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, padTop, 0, h - padBottom);
+  grad.addColorStop(0, 'rgba(0,255,136,0.25)');
+  grad.addColorStop(1, 'rgba(0,255,136,0.02)');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Points
+  historyData.forEach((pt, i) => {
+    const x = padLeft + (i / (historyData.length - 1)) * chartW;
+    const y = padTop + ((maxV - pt.val) / range) * chartH;
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#00ff88';
+    ctx.fill();
+    ctx.strokeStyle = '#1a1a2e';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
+
+  // Time labels
+  ctx.fillStyle = '#888';
+  ctx.font = '11px Segoe UI';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  const times = [0, Math.floor(historyData.length / 2), historyData.length - 1];
+  times.forEach(idx => {
+    const x = padLeft + (idx / (historyData.length - 1)) * chartW;
+    const t = new Date(historyData[idx].t);
+    const label = t.getHours().toString().padStart(2, '0') + ':' + t.getMinutes().toString().padStart(2, '0') + ':' + t.getSeconds().toString().padStart(2, '0');
+    ctx.fillText(label, x, h - padBottom + 4);
+  });
+}
+
+// Initial draw
+drawChart();
+</script>
+</body>
+</html>
