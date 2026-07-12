@@ -1,0 +1,22 @@
+{
+  "port": null,
+  "mode": "dashboard",
+  "baudrate": 2400,
+  "output_dir": ".",
+  "web_port": 8080,
+  "smoothing_window": 5,
+  "alert_min": null,
+  "alert_max": 30.0,
+  "alert_beep": true,
+  "auto_reconnect": true,
+  "reconnect_delay": 3,
+  "influxdb_url": null,
+  "influxdb_token": null,
+  "influxdb_bucket": "dmm",
+  "influxdb_org": "-",
+  "mqtt_broker": null,
+  "mqtt_port": 1883,
+  "mqtt_topic": "bolyfa117/data",
+  "mqtt_user": null,
+  "mqtt_pass": null
+}
