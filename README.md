@@ -158,10 +158,13 @@ See [Protocol Analysis](BOLYFA117_Protocol_Analysis.md) for full details.
 - Ensure the meter is in USB mode (USB icon on LCD)
 - Try a different USB cable or port
 
-## Credits
+## Acknowledgements
 
-- Protocol reverse-engineered by [PaulZC](https://github.com/PaulZC/DMM_Data_Logger) and [Paul Daniels](https://github.com/inflex/BSIDE-ADM20)
-- BOLYFA 117 meter by BOLYFA
+This project builds on the reverse-engineering work of:
+
+- **[furriephillips](https://github.com/furriephillips/BOLYFA117-USB-DMM)** — Original BOLYFA 117 USB protocol discovery
+- **[PaulZC](https://github.com/PaulZC/DMM_Data_Logger)** — Python 2 CSV logger and packet decoder
+- **[Paul Daniels (inflex)](https://github.com/inflex/BSIDE-ADM20)** — Original 7-segment lookup tables and framing logic
 
 ## License
 
