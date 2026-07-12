@@ -5,46 +5,105 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BOLYFA 117 Browser Dashboard</title>
 <style>
+  /* ===================== CSS VARIABLES FOR THEME ===================== */
+  :root {
+    --bg-body: #1a1a2e;
+    --bg-card: #16213e;
+    --bg-chart: #0f1a2e;
+    --bg-stat: #0f1a2e;
+    --bg-bar: #0f3460;
+    --bg-flag: #0f3460;
+    --bg-info: #0f3460;
+    --text-primary: #eee;
+    --text-secondary: #aaa;
+    --text-dim: #666;
+    --accent-cyan: #00d4ff;
+    --accent-green: #00ff88;
+    --accent-orange: #ffaa00;
+    --accent-red: #ff4444;
+    --grid-color: #1a3a5c;
+    --axis-color: #2a4a6c;
+    --border-flag: #0f3460;
+  }
+
+  [data-theme="light"] {
+    --bg-body: #f0f2f5;
+    --bg-card: #ffffff;
+    --bg-chart: #f8f9fa;
+    --bg-stat: #f8f9fa;
+    --bg-bar: #e9ecef;
+    --bg-flag: #e3f2fd;
+    --bg-info: #e3f2fd;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-dim: #868e96;
+    --accent-cyan: #0066cc;
+    --accent-green: #28a745;
+    --accent-orange: #fd7e14;
+    --accent-red: #dc3545;
+    --grid-color: #dee2e6;
+    --axis-color: #adb5bd;
+    --border-flag: #90caf9;
+  }
+
   *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#1a1a2e;color:#eee;min-height:100vh;padding:10px}
-  h1{text-align:center;color:#00d4ff;margin:8px 0;font-size:1.4rem}
+  body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg-body);color:var(--text-primary);min-height:100vh;padding:10px;transition:background 0.3s,color 0.3s}
+  h1{text-align:center;color:var(--accent-cyan);margin:8px 0;font-size:1.4rem}
   .container{max-width:900px;margin:0 auto;padding:0 5px}
-  .btn{display:inline-block;background:#00d4ff;color:#1a1a2e;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;transition:background 0.2s}
-  .btn:hover{background:#00ff88}
-  .btn:disabled{background:#555;color:#aaa;cursor:not-allowed}
-  .btn-wrap{text-align:center;margin:10px 0}
-  .card{background:#16213e;border-radius:12px;padding:15px;margin:10px 0;box-shadow:0 4px 15px rgba(0,0,0,0.3)}
-  .big-value{font-size:clamp(48px,12vw,72px);text-align:center;color:#00ff88;font-weight:bold;margin:8px 0;line-height:1}
-  .units{font-size:clamp(18px,4vw,28px);color:#aaa;text-align:center;margin-top:4px}
-  .mode{font-size:clamp(14px,3vw,18px);color:#ffaa00;text-align:center;margin-top:4px;min-height:20px}
+  .btn{display:inline-block;background:var(--accent-cyan);color:#1a1a2e;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:bold;cursor:pointer;transition:background 0.2s,transform 0.1s}
+  .btn:hover{background:var(--accent-green);transform:translateY(-1px)}
+  .btn:disabled{background:#555;color:#aaa;cursor:not-allowed;transform:none}
+  [data-theme="light"] .btn{color:#fff}
+  .btn-wrap{text-align:center;margin:10px 0;display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+  .btn-secondary{background:var(--bg-bar);color:var(--text-primary);border:1px solid var(--grid-color)}
+  .btn-secondary:hover{background:var(--accent-cyan);color:#1a1a2e}
+  .btn-demo{background:var(--accent-orange);color:#1a1a2e}
+  .btn-demo:hover{background:#ffcc00}
+  .card{background:var(--bg-card);border-radius:12px;padding:15px;margin:10px 0;box-shadow:0 4px 15px rgba(0,0,0,0.1);transition:background 0.3s}
+  .big-value{font-size:clamp(48px,12vw,72px);text-align:center;color:var(--accent-green);font-weight:bold;margin:8px 0;line-height:1}
+  .units{font-size:clamp(18px,4vw,28px);color:var(--text-secondary);text-align:center;margin-top:4px}
+  .mode{font-size:clamp(14px,3vw,18px);color:var(--accent-orange);text-align:center;margin-top:4px;min-height:20px}
   .flags{text-align:center;margin:8px 0;min-height:24px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px}
-  .flag{background:#0f3460;padding:3px 10px;border-radius:10px;font-size:11px;color:#00d4ff;border:1px solid #0f3460}
-  .bar-container{background:#0f3460;border-radius:6px;height:28px;margin:12px 0;overflow:hidden;position:relative}
-  .bar-fill{background:linear-gradient(90deg,#00ff88,#00d4ff);height:100%;width:0%;transition:width 0.4s ease}
+  .flag{background:var(--bg-flag);padding:3px 10px;border-radius:10px;font-size:11px;color:var(--accent-cyan);border:1px solid var(--border-flag);transition:background 0.3s}
+  .bar-container{background:var(--bg-bar);border-radius:6px;height:28px;margin:12px 0;overflow:hidden;position:relative;transition:background 0.3s}
+  .bar-fill{background:linear-gradient(90deg,var(--accent-green),var(--accent-cyan));height:100%;width:0%;transition:width 0.4s ease}
   .bar-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:11px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);pointer-events:none}
   .status{text-align:center;font-size:13px;margin-top:8px}
-  .connected{color:#00ff88}.disconnected{color:#ff4444}.error{color:#ff4444}
-  .timestamp{text-align:center;color:#666;font-size:11px;margin-top:6px}
+  .connected{color:var(--accent-green)}.disconnected{color:var(--accent-red)}
+  .timestamp{text-align:center;color:var(--text-dim);font-size:11px;margin-top:6px}
   .chart-wrap{position:relative;margin-top:12px;overflow-x:auto}
-  canvas{width:100%;height:200px;background:#0f1a2e;border-radius:6px;border:1px solid #1a3a5c;display:block}
+  canvas{width:100%;height:200px;background:var(--bg-chart);border-radius:6px;border:1px solid var(--grid-color);display:block;transition:background 0.3s}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(80px,1fr));gap:8px;margin-top:10px}
-  .stat{text-align:center;background:#0f1a2e;border-radius:6px;padding:6px}
-  .stat-label{color:#888;font-size:10px;text-transform:uppercase;letter-spacing:0.5px}
-  .stat-value{color:#00d4ff;font-size:clamp(14px,3vw,16px);font-weight:bold}
-  .alert-banner{background:#ff4444;color:#fff;text-align:center;padding:8px;border-radius:6px;margin:8px 0;font-weight:bold;display:none}
+  .stat{text-align:center;background:var(--bg-stat);border-radius:6px;padding:6px;transition:background 0.3s}
+  .stat-label{color:var(--text-dim);font-size:10px;text-transform:uppercase;letter-spacing:0.5px}
+  .stat-value{color:var(--accent-cyan);font-size:clamp(14px,3vw,16px);font-weight:bold}
+  .alert-banner{background:var(--accent-red);color:#fff;text-align:center;padding:8px;border-radius:6px;margin:8px 0;font-weight:bold;display:none}
   .alert-banner.show{display:block}
-  .info-box{background:#0f3460;border-radius:8px;padding:12px;margin:10px 0;font-size:13px;color:#aaa}
-  .info-box code{background:#1a1a2e;padding:2px 6px;border-radius:4px;color:#00ff88;font-family:monospace}
+  .info-box{background:var(--bg-info);border-radius:8px;padding:12px;margin:10px 0;font-size:13px;color:var(--text-secondary);transition:background 0.3s}
+  .info-box code{background:var(--bg-body);padding:2px 6px;border-radius:4px;color:var(--accent-green);font-family:monospace}
+  .theme-toggle{position:fixed;top:10px;right:10px;background:var(--bg-card);border:1px solid var(--grid-color);border-radius:20px;padding:6px 12px;cursor:pointer;font-size:12px;z-index:1000;transition:background 0.3s}
+  .theme-toggle:hover{background:var(--accent-cyan);color:#1a1a2e}
+  .csv-section{text-align:center;margin:10px 0}
+  .hidden{display:none}
   @media(min-width:600px){.stats{grid-template-columns:repeat(5,1fr)}.big-value{font-size:72px}.units{font-size:28px}}
 </style>
 </head>
 <body>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark/light theme">&#127769; Dark</button>
+
 <div class="container">
   <h1>&#128268; BOLYFA 117 Browser Dashboard</h1>
 
   <div class="btn-wrap">
     <button id="connectBtn" class="btn">&#128268; Connect to BOLYFA 117</button>
     <button id="disconnectBtn" class="btn" disabled>&#10060; Disconnect</button>
+    <button id="demoBtn" class="btn btn-demo">&#127918; Demo Mode</button>
+    <button id="stopDemoBtn" class="btn hidden" disabled>&#9632; Stop Demo</button>
+  </div>
+
+  <div class="csv-section">
+    <button id="downloadCsvBtn" class="btn btn-secondary" disabled>&#128190; Download CSV</button>
+    <span id="csvCount" style="font-size:12px;color:var(--text-dim);margin-left:8px"></span>
   </div>
 
   <div class="info-box" id="infoBox">
@@ -52,7 +111,8 @@
     1. Plug in your BOLYFA 117 USB cable<br>
     2. Press the <code>REL/USB</code> button on the meter until the USB icon appears<br>
     3. Click <strong>Connect</strong> above and select the CH340 port from the browser prompt<br>
-    4. This works in <strong>Chrome/Edge only</strong> (Web Serial API required)
+    4. Works in <strong>Chrome/Edge only</strong> (Web Serial API required)<br><br>
+    <strong>No hardware?</strong> Click <strong>Demo Mode</strong> to see the dashboard with simulated data.
   </div>
 
   <div class="alert-banner" id="alert-banner">ALERT</div>
@@ -84,11 +144,64 @@
 
   <div class="card">
     <h3>&#128225; Raw Packet</h3>
-    <div style="font-family:monospace;font-size:12px;color:#888;background:#0f1a2e;padding:10px;border-radius:6px;overflow-x:auto" id="rawPacket">Waiting for data...</div>
+    <div style="font-family:monospace;font-size:12px;color:var(--text-dim);background:var(--bg-chart);padding:10px;border-radius:6px;overflow-x:auto" id="rawPacket">Waiting for data...</div>
   </div>
 </div>
 
 <script>
+// ======================== THEME TOGGLE ========================
+const themeToggle = document.getElementById('themeToggle');
+let currentTheme = 'dark';
+
+// Check for saved preference
+if (localStorage.getItem('bolyfa-theme') === 'light') {
+  document.documentElement.setAttribute('data-theme', 'light');
+  currentTheme = 'light';
+  themeToggle.textContent = '&#127774; Light';
+}
+
+themeToggle.addEventListener('click', () => {
+  if (currentTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'light');
+    currentTheme = 'light';
+    themeToggle.textContent = '&#127774; Light';
+    localStorage.setItem('bolyfa-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+    currentTheme = 'dark';
+    themeToggle.textContent = '&#127769; Dark';
+    localStorage.setItem('bolyfa-theme', 'dark');
+  }
+  drawChart();
+});
+
+// ======================== CSV STORAGE ========================
+let csvData = [];
+const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+const csvCount = document.getElementById('csvCount');
+
+downloadCsvBtn.addEventListener('click', () => {
+  if (csvData.length === 0) return;
+  const header = 'Timestamp,Value,Units,Mode,Flags,Bar\n';
+  const rows = csvData.map(d => `${d.timestamp},${d.value},${d.units},${d.mode},"${d.flags}",${d.bar}`).join('\n');
+  const blob = new Blob([header + rows], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `BOLYFA117_Log_${new Date().toISOString().slice(0,19).replace(/:/g,'')}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+
+function addToCsv(data) {
+  csvData.push(data);
+  if (csvData.length > 10000) csvData.shift(); // Keep last 10k rows
+  downloadCsvBtn.disabled = false;
+  csvCount.textContent = `${csvData.length} rows buffered`;
+}
+
 // ======================== PROTOCOL DECODER ========================
 const HEADER = [0xAA, 0x55, 0x52, 0x24, 0x01, 0x10];
 const PACKET_SIZE = 22;
@@ -115,12 +228,9 @@ function countBits(byteVal) {
 
 function decodePacket(packet) {
   if (packet.length !== PACKET_SIZE) return null;
-  // Verify header
   for (let i = 0; i < 6; i++) {
     if (packet[i] !== HEADER[i]) return null;
   }
-
-  // Decode digits (bytes 9,8,7,6)
   const digits = [];
   let d = decodeDigit(packet[9]);
   if (d) digits.push(d);
@@ -132,7 +242,6 @@ function decodePacket(packet) {
   const sign = (packet[10] & 0x08) ? '-' : '';
   const valueStr = sign + digits.join('');
 
-  // Decode units
   const b21 = packet[21], b20 = packet[20], b19 = packet[19];
   const units = [];
   if (b21 & 0x20) units.push('k');
@@ -151,14 +260,12 @@ function decodePacket(packet) {
   if (b19 & 0x20) units.push('%');
   if (b19 & 0x40) units.push('hFE');
 
-  // Decode modes
   const modes = [];
   if (packet[10] & 0x04) modes.push('DC');
   if (packet[10] & 0x02) modes.push('AC');
   if (packet[10] & 0x01) modes.push('DIODE');
   if (packet[10] & 0x40) modes.push('CONT');
 
-  // Decode flags
   const flags = [];
   if (packet[19] & 0x01) flags.push('USB');
   if (packet[18] & 0x20) flags.push('AUTO');
@@ -167,7 +274,6 @@ function decodePacket(packet) {
   if (packet[19] & 0x08) flags.push('MIN');
   if (packet[10] & 0x20) flags.push('BAR');
 
-  // Bar graph
   let bars = 0;
   for (let i = 11; i < 18; i++) bars += countBits(packet[i]);
   bars += countBits(packet[18] & 0x0F);
@@ -183,6 +289,103 @@ function decodePacket(packet) {
   };
 }
 
+// ======================== DEMO MODE ========================
+let demoInterval = null;
+let demoPhase = 0;
+const demoBtn = document.getElementById('demoBtn');
+const stopDemoBtn = document.getElementById('stopDemoBtn');
+
+function encodeDigit7Seg(char) {
+  const map = { '0': 0x5F, '1': 0x06, '2': 0x6B, '3': 0x2F, '4': 0x36, '5': 0x3D, '6': 0x7D, '7': 0x07, '8': 0x7F, '9': 0x3F };
+  return map[char] || 0x00;
+}
+
+function generateDemoPacket() {
+  // Generate a sine wave value between 20.0 and 30.0
+  demoPhase += 0.1;
+  const val = 25 + 5 * Math.sin(demoPhase);
+  const valStr = val.toFixed(1);
+
+  // Build packet
+  const p = new Uint8Array(PACKET_SIZE);
+  p.set(HEADER);
+
+  // Encode digits: e.g., "25.1" -> [2][5].[1]
+  // Byte 9 = leftmost digit, 8,7,6 = next digits with DP before
+  const chars = valStr.split('');
+  let digitIdx = 0;
+  let dpNext = false;
+  const digitBytes = [9, 8, 7, 6];
+
+  for (let i = 0; i < chars.length && digitIdx < 4; i++) {
+    const ch = chars[i];
+    if (ch === '.') {
+      dpNext = true;
+    } else {
+      let seg = encodeDigit7Seg(ch);
+      if (dpNext) {
+        seg |= 0x80;
+        dpNext = false;
+      }
+      p[digitBytes[digitIdx]] = seg;
+      digitIdx++;
+    }
+  }
+
+  // Units: °C
+  p[20] = 0x01; // °C
+  p[21] = 0x00;
+
+  // Mode/flags: USB + AUTO
+  p[10] = 0x01; // USB flag bit
+  p[18] = 0x20; // AUTO
+  p[19] = 0x01; // USB
+
+  // Bar graph: proportional to value
+  const barCount = Math.floor((val / 60) * 60);
+  let remaining = barCount;
+  for (let i = 11; i < 18; i++) {
+    p[i] = Math.min(remaining, 8) === 8 ? 0xFF : (Math.min(remaining, 8) === 0 ? 0x00 : (0xFF >> (8 - Math.min(remaining, 8))));
+    remaining = Math.max(0, remaining - 8);
+  }
+  p[18] = (p[18] & 0xF0) | Math.min(remaining, 15);
+
+  return p;
+}
+
+function startDemo() {
+  if (demoInterval) return;
+  demoBtn.classList.add('hidden');
+  stopDemoBtn.classList.remove('hidden');
+  stopDemoBtn.disabled = false;
+  connectBtn.disabled = true;
+  document.getElementById('infoBox').innerHTML = '<strong>Status:</strong> Demo mode active — generating synthetic temperature data.';
+
+  demoInterval = setInterval(() => {
+    const packet = generateDemoPacket();
+    const data = decodePacket(packet);
+    if (data) {
+      updateDashboard(data);
+      addToCsv(data);
+    }
+  }, 500);
+}
+
+function stopDemo() {
+  if (demoInterval) {
+    clearInterval(demoInterval);
+    demoInterval = null;
+  }
+  demoBtn.classList.remove('hidden');
+  stopDemoBtn.classList.add('hidden');
+  stopDemoBtn.disabled = true;
+  connectBtn.disabled = false;
+  document.getElementById('infoBox').innerHTML = '<strong>Status:</strong> Demo stopped. Click Connect or Demo Mode to start.';
+}
+
+demoBtn.addEventListener('click', startDemo);
+stopDemoBtn.addEventListener('click', stopDemo);
+
 // ======================== WEB SERIAL ========================
 let port = null;
 let reader = null;
@@ -192,7 +395,6 @@ const buffer = [];
 const connectBtn = document.getElementById('connectBtn');
 const disconnectBtn = document.getElementById('disconnectBtn');
 const statusEl = document.getElementById('status');
-const infoBox = document.getElementById('infoBox');
 
 connectBtn.addEventListener('click', async () => {
   if (!('serial' in navigator)) {
@@ -200,14 +402,14 @@ connectBtn.addEventListener('click', async () => {
     return;
   }
   try {
-    // Request port - CH340 vendor ID is 0x1a86 (QinHeng)
     port = await navigator.serial.requestPort({ filters: [{ usbVendorId: 0x1a86 }] });
     await port.open({ baudRate: 2400, dataBits: 8, parity: 'none', stopBits: 1 });
 
     connectBtn.disabled = true;
     disconnectBtn.disabled = false;
+    demoBtn.disabled = true;
     statusEl.innerHTML = '<span class="connected">&#9679; Connected</span>';
-    infoBox.innerHTML = '<strong>Status:</strong> Reading data from BOLYFA 117...';
+    document.getElementById('infoBox').innerHTML = '<strong>Status:</strong> Reading data from BOLYFA 117...';
     keepReading = true;
     readLoop();
   } catch (err) {
@@ -218,18 +420,13 @@ connectBtn.addEventListener('click', async () => {
 
 disconnectBtn.addEventListener('click', async () => {
   keepReading = false;
-  if (reader) {
-    await reader.cancel();
-    reader = null;
-  }
-  if (port) {
-    await port.close();
-    port = null;
-  }
+  if (reader) { await reader.cancel(); reader = null; }
+  if (port) { await port.close(); port = null; }
   connectBtn.disabled = false;
   disconnectBtn.disabled = true;
+  demoBtn.disabled = false;
   statusEl.innerHTML = '<span class="disconnected">&#9679; Disconnected</span>';
-  infoBox.innerHTML = '<strong>Status:</strong> Disconnected. Click Connect to start.';
+  document.getElementById('infoBox').innerHTML = '<strong>Status:</strong> Disconnected. Click Connect to start.';
 });
 
 async function readLoop() {
@@ -240,13 +437,8 @@ async function readLoop() {
       const { value, done } = await reader.read();
       if (done) break;
       if (value) {
-        for (const b of value) {
-          buffer.push(b);
-        }
-        // Keep buffer bounded
-        if (buffer.length > 200) {
-          buffer.splice(0, buffer.length - 100);
-        }
+        for (const b of value) buffer.push(b);
+        if (buffer.length > 200) buffer.splice(0, buffer.length - 100);
         processBuffer();
       }
     }
@@ -260,7 +452,6 @@ async function readLoop() {
 
 function processBuffer() {
   while (buffer.length >= PACKET_SIZE) {
-    // Look for header
     let found = false;
     for (let i = 0; i <= buffer.length - PACKET_SIZE; i++) {
       let match = true;
@@ -273,15 +464,13 @@ function processBuffer() {
         const data = decodePacket(packet);
         if (data) {
           updateDashboard(data);
+          addToCsv(data);
         }
         found = true;
         break;
       }
     }
-    if (!found) {
-      // No header found, discard oldest byte and try again
-      buffer.shift();
-    }
+    if (!found) buffer.shift();
   }
 }
 
@@ -300,7 +489,6 @@ function updateDashboard(data) {
   document.getElementById('bar').style.width = barPct + '%';
   document.getElementById('bar-label').textContent = (data.bar || 0) + ' / 60';
 
-  // Flags
   const flagsDiv = document.getElementById('flags');
   flagsDiv.innerHTML = '';
   if (data.flags) {
@@ -314,7 +502,6 @@ function updateDashboard(data) {
     });
   }
 
-  // Chart data
   let nv = parseFloat(data.value);
   if (!isNaN(nv)) {
     lastNumericValue = nv;
@@ -365,7 +552,6 @@ function drawChart() {
   minV -= pad; maxV += pad;
   const range = maxV - minV || 1;
 
-  // Grid lines
   ctx.strokeStyle = '#1a3a5c';
   ctx.lineWidth = 1;
   for (let i = 0; i <= 5; i++) {
@@ -382,7 +568,6 @@ function drawChart() {
     ctx.fillText(formatNum(labelVal), padLeft - 6, y);
   }
 
-  // Y-axis
   ctx.strokeStyle = '#2a4a6c';
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -390,7 +575,6 @@ function drawChart() {
   ctx.lineTo(padLeft, h - padBottom);
   ctx.stroke();
 
-  // Line
   ctx.beginPath();
   historyData.forEach((pt, i) => {
     const x = padLeft + (i / (historyData.length - 1)) * chartW;
@@ -401,7 +585,6 @@ function drawChart() {
   ctx.lineWidth = 2.5;
   ctx.stroke();
 
-  // Fill
   ctx.lineTo(padLeft + chartW, h - padBottom);
   ctx.lineTo(padLeft, h - padBottom);
   ctx.closePath();
@@ -411,7 +594,6 @@ function drawChart() {
   ctx.fillStyle = grad;
   ctx.fill();
 
-  // Points
   historyData.forEach((pt, i) => {
     const x = padLeft + (i / (historyData.length - 1)) * chartW;
     const y = padTop + ((maxV - pt.val) / range) * chartH;
@@ -424,7 +606,6 @@ function drawChart() {
     ctx.stroke();
   });
 
-  // Time labels
   ctx.fillStyle = '#888';
   ctx.font = '11px Segoe UI';
   ctx.textAlign = 'center';
@@ -438,7 +619,6 @@ function drawChart() {
   });
 }
 
-// Initial draw
 drawChart();
 </script>
 </body>

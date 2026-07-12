@@ -49,6 +49,8 @@ python3 bolyfa117_logger.py --mode dashboard --port /dev/ttyUSB0
 
 ## Browser Dashboard (No Installation Required)
 
+The browser app includes a **dark/light theme toggle** (top-right corner) and a **Download CSV** button to save your data without installing Python.
+
 You can use the BOLYFA 117 directly in your browser without installing Python:
 
 **[Launch Browser App](https://gwb2025.github.io/BOLYFA117-USB-DMM)**
@@ -58,6 +60,19 @@ Requirements:
 - BOLYFA 117 in USB mode (press the REL/USB button until the USB icon appears)
 
 The browser app uses the [Web Serial API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Serial_API) to communicate directly with the CH340 USB bridge. All protocol decoding, smoothing, and charting runs locally in JavaScript — no data leaves your computer.
+
+## Demo Mode (No Hardware Required)
+
+Want to see the dashboard in action without owning a BOLYFA 117? The browser app includes a **Demo Mode** that generates synthetic temperature data:
+
+1. Visit **[https://gwb2025.github.io/BOLYFA117-USB-DMM](https://gwb2025.github.io/BOLYFA117-USB-DMM)**
+2. Click **"Demo Mode"**
+3. Watch the live trend chart animate with simulated data
+
+This is perfect for:
+- Evaluating the dashboard before buying the meter
+- Recording a GIF/video for documentation
+- Testing the UI on different screen sizes
 
 ## Usage
 
